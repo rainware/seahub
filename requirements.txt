@@ -1,0 +1,10 @@
+asgiref==3.11.0
+decorator==5.2.1
+Django==5.2.8
+django-cors-headers==4.9.0
+djangorestframework==3.16.1
+jsonpath-rw==1.4.0
+ply==3.11
+PyMySQL==1.1.2
+six==1.17.0
+sqlparse==0.5.3

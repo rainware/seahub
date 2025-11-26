@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Deep Ocean Theme (Dark Mode by Default) */
+    --background: 222.2 84% 4.9%;
+    /* Slate 950 */
+    --foreground: 210 40% 98%;
+    /* Slate 50 */
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Light Ocean Theme (Fresh & Vibrant) */
+    --background: 200 50% 98%;
+    /* Light Blue/White */
+    --foreground: 215 25% 27%;
+    /* Dark Slate Blue */
+
+    --primary: 199 89% 48%;
+    /* Sky 500 */
+    --accent: 186 70% 50%;
+    /* Cyan 500 */
+
+    --border: 210 20% 90%;
+    /* Very Light Blue Grey */
+    --ring: 199 89% 48%;
+
+    --radius: 1rem;
+    /* Rounder corners */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-800 selection:bg-sky-200;
+    background-image:
+      radial-gradient(circle at 50% 0%, rgba(186, 230, 253, 0.4) 0%, transparent 60%),
+      radial-gradient(circle at 0% 50%, rgba(125, 211, 252, 0.2) 0%, transparent 50%),
+      linear-gradient(to bottom, #f0f9ff 0%, #e0f2fe 100%);
+    background-attachment: fixed;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/60 backdrop-blur-md border border-white/40 shadow-lg;
+  }
+
+  .glass-card {
+    @apply bg-white/70 backdrop-blur-xl border border-white/60 shadow-lg shadow-sky-100/50 transition-all duration-300 hover:border-sky-300/50 hover:shadow-sky-200/60 hover:-translate-y-1;
+  }
+
+  .glass-panel {
+    @apply bg-white/80 backdrop-blur-2xl border-r border-white/40 shadow-xl shadow-sky-100/20;
+  }
+
+  .text-glow {
+    text-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
+  }
+
+  .box-glow {
+    box-shadow: 0 0 40px -10px rgba(14, 165, 233, 0.2);
+  }
+}
