@@ -1,6 +1,15 @@
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Button } from "@/components/ui/button";
 import { getDags, createDag } from '../lib/api';
+import { Plus, Upload, FileJson } from 'lucide-react';
 
-// ... imports
+interface Dag {
+    id: number;
+    name: string;
+    title: string;
+    version: number;
+}
 
 const DAGList: React.FC = () => {
     const [dags, setDags] = useState<Dag[]>([]);
@@ -8,7 +17,7 @@ const DAGList: React.FC = () => {
     const [batchJson, setBatchJson] = useState('');
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(1);
-    const [pageSize] = useState(20);
+    const [pageSize] = useState(9);
     const [totalCount, setTotalCount] = useState(0);
 
     const fetchDags = () => {
@@ -26,7 +35,22 @@ const DAGList: React.FC = () => {
         fetchDags();
     }, [page]);
 
-    // ... handleBatchCreate ...
+    const handleBatchCreate = async () => {
+        setLoading(true);
+        try {
+            const payload = JSON.parse(batchJson);
+            await createDag(payload);
+            setIsBatchModalOpen(false);
+            setBatchJson('');
+            fetchDags();
+        } catch (error: any) {
+            console.error('Failed to batch create DAGs:', error);
+            const errorMessage = error.response?.data ? JSON.stringify(error.response.data) : error.message;
+            alert(`Failed to create DAGs: ${errorMessage}`);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="space-y-8">

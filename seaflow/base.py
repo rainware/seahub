@@ -8,8 +8,7 @@ from django.db import transaction, models
 from django.utils import timezone
 from json_logic import jsonLogic
 
-from libs import errors
-from libs.services.es_service import log_2_es_msg
+from . import errors
 from .consts import ActionTypes, TaskStates, StepStates
 from .models import Action, Dag, Node, Task, Step
 from .params import ParamAdapter, ParamDefinition

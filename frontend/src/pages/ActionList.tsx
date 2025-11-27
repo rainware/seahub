@@ -2,10 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { getActions, createAction, deleteAction } from '../lib/api';
 import type { Action } from '../types';
 import { Button } from '@/components/ui/button';
-import { Terminal, Trash2, Plus, Upload, Code } from 'lucide-react';
+import { Terminal, Trash2, Plus, Upload, Code, ChevronDown } from 'lucide-react';
 
 const ActionList: React.FC = () => {
     const [actions, setActions] = useState<Action[]>([]);
+    const [page, setPage] = useState(1);
+    const [pageSize] = useState(5);
+    const [totalCount, setTotalCount] = useState(0);
+    const [expandedActions, setExpandedActions] = useState<Set<number>>(new Set());
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [newAction, setNewAction] = useState({
         name: '',
@@ -19,8 +23,9 @@ const ActionList: React.FC = () => {
 
     const fetchActions = async () => {
         try {
-            const response = await getActions();
-            setActions(response.data);
+            const response = await getActions({ page, page_size: pageSize });
+            setActions(response.data.results);
+            setTotalCount(response.data.count);
         } catch (error) {
             console.error('Failed to fetch actions:', error);
         }
@@ -28,7 +33,7 @@ const ActionList: React.FC = () => {
 
     useEffect(() => {
         fetchActions();
-    }, []);
+    }, [page]);
 
     const handleDelete = async (id: number) => {
         if (!confirm('Are you sure you want to delete this action?')) return;
@@ -84,6 +89,18 @@ const ActionList: React.FC = () => {
         }
     };
 
+    const toggleExpand = (actionId: number) => {
+        setExpandedActions(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(actionId)) {
+                newSet.delete(actionId);
+            } else {
+                newSet.add(actionId);
+            }
+            return newSet;
+        });
+    };
+
     return (
         <div className="space-y-8">
             <div className="flex justify-between items-center">
@@ -113,66 +130,108 @@ const ActionList: React.FC = () => {
             </div>
 
             <div className="grid gap-4">
-                {actions.map(action => (
-                    <div key={action.id} className="glass-card rounded-2xl p-6 group">
-                        <div className="flex items-start justify-between mb-4">
-                            <div className="flex items-center gap-4">
-                                <div className={`p-3 rounded-xl ${action.type === 'external' ? 'bg-orange-100 text-orange-600' :
-                                    action.type === 'carrier' ? 'bg-purple-100 text-purple-600' :
-                                        'bg-sky-100 text-sky-600'
-                                    }`}>
-                                    <Terminal className="w-6 h-6" />
-                                </div>
-                                <div>
-                                    <div className="flex items-center gap-3">
-                                        <h3 className="text-lg font-bold text-slate-700 group-hover:text-sky-600 transition-colors">
-                                            {action.title || action.name}
-                                        </h3>
-                                        <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${action.type === 'external' ? 'bg-orange-50 text-orange-600 border-orange-200' :
-                                            action.type === 'carrier' ? 'bg-purple-50 text-purple-600 border-purple-200' :
-                                                'bg-sky-50 text-sky-600 border-sky-200'
-                                            }`}>
-                                            {action.type || 'default'}
-                                        </span>
+                {actions.map(action => {
+                    const isExpanded = expandedActions.has(action.id);
+                    return (
+                        <div key={action.id} className="glass-card rounded-2xl p-6 group">
+                            <div className={`flex items-start justify-between ${isExpanded ? 'mb-4' : ''}`}>
+                                <div
+                                    className="flex items-center gap-4 flex-1 cursor-pointer"
+                                    onClick={() => toggleExpand(action.id)}
+                                >
+                                    <div className={`p-3 rounded-xl ${action.type === 'external' ? 'bg-orange-100 text-orange-600' :
+                                        action.type === 'carrier' ? 'bg-purple-100 text-purple-600' :
+                                            'bg-sky-100 text-sky-600'
+                                        }`}>
+                                        <Terminal className="w-6 h-6" />
                                     </div>
-                                    <p className="text-sm text-slate-500 font-mono mt-1">{action.name}</p>
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-3">
+                                            <h3 className="text-lg font-bold text-slate-700 group-hover:text-sky-600 transition-colors">
+                                                {action.title || action.name}
+                                            </h3>
+                                            <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${action.type === 'external' ? 'bg-orange-50 text-orange-600 border-orange-200' :
+                                                action.type === 'carrier' ? 'bg-purple-50 text-purple-600 border-purple-200' :
+                                                    'bg-sky-50 text-sky-600 border-sky-200'
+                                                }`}>
+                                                {action.type || 'default'}
+                                            </span>
+                                        </div>
+                                        <p className="text-sm text-slate-500 font-mono mt-1">{action.name}</p>
+                                    </div>
+                                    <ChevronDown
+                                        className={`w-5 h-5 text-slate-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                                    />
                                 </div>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDelete(action.id);
+                                    }}
+                                    className="text-slate-400 hover:text-rose-600 hover:bg-rose-50 ml-2"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </Button>
                             </div>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDelete(action.id)}
-                                className="text-slate-400 hover:text-rose-600 hover:bg-rose-50"
-                            >
-                                <Trash2 className="w-4 h-4" />
-                            </Button>
-                        </div>
 
-                        <div className="space-y-4 pl-[4.5rem]">
-                            {action.type !== 'external' && (
-                                <div className="flex items-center gap-2 text-sm text-slate-600 bg-slate-50 px-3 py-2 rounded-lg border border-slate-200 font-mono">
-                                    <Code className="w-4 h-4 text-slate-400" />
-                                    {action.func}
+                            {isExpanded && (
+                                <div className="space-y-4 pl-[4.5rem] animate-in slide-in-from-top-2 duration-200">
+                                    {action.type !== 'external' && (
+                                        <div className="flex items-center gap-2 text-sm text-slate-600 bg-slate-50 px-3 py-2 rounded-lg border border-slate-200 font-mono">
+                                            <Code className="w-4 h-4 text-slate-400" />
+                                            {action.func}
+                                        </div>
+                                    )}
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Input Definition</h4>
+                                            <pre className="bg-slate-50 border border-slate-200 p-3 rounded-xl overflow-auto max-h-40 text-xs font-mono text-slate-600">
+                                                {JSON.stringify(action.input_def, null, 2)}
+                                            </pre>
+                                        </div>
+                                        <div>
+                                            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Output Definition</h4>
+                                            <pre className="bg-slate-50 border border-slate-200 p-3 rounded-xl overflow-auto max-h-40 text-xs font-mono text-slate-600">
+                                                {JSON.stringify(action.output_def, null, 2)}
+                                            </pre>
+                                        </div>
+                                    </div>
                                 </div>
                             )}
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Input Definition</h4>
-                                    <pre className="bg-slate-50 border border-slate-200 p-3 rounded-xl overflow-auto max-h-40 text-xs font-mono text-slate-600">
-                                        {JSON.stringify(action.input_def, null, 2)}
-                                    </pre>
-                                </div>
-                                <div>
-                                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Output Definition</h4>
-                                    <pre className="bg-slate-50 border border-slate-200 p-3 rounded-xl overflow-auto max-h-40 text-xs font-mono text-slate-600">
-                                        {JSON.stringify(action.output_def, null, 2)}
-                                    </pre>
-                                </div>
-                            </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
+            </div>
+
+            {/* Pagination Controls */}
+            <div className="flex justify-between items-center mt-6">
+                <div className="text-sm text-slate-500">
+                    Showing {actions.length} of {totalCount} results
+                </div>
+                <div className="flex gap-2">
+                    <Button
+                        variant="outline"
+                        onClick={() => setPage(p => Math.max(1, p - 1))}
+                        disabled={page === 1}
+                        className="border-slate-200 text-slate-600 hover:bg-slate-50"
+                    >
+                        Previous
+                    </Button>
+                    <span className="flex items-center px-4 text-sm text-slate-600 font-medium">
+                        Page {page} of {Math.max(1, Math.ceil(totalCount / pageSize))}
+                    </span>
+                    <Button
+                        variant="outline"
+                        onClick={() => setPage(p => p + 1)}
+                        disabled={page >= Math.ceil(totalCount / pageSize)}
+                        className="border-slate-200 text-slate-600 hover:bg-slate-50"
+                    >
+                        Next
+                    </Button>
+                </div>
             </div>
 
             {isBatchModalOpen && (

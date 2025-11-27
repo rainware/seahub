@@ -40,7 +40,7 @@ const DagCreate: React.FC = () => {
 
     useEffect(() => {
         getActions().then(res => {
-            setActions(res.data);
+            setActions(res.data.results || res.data);
         });
     }, []);
 

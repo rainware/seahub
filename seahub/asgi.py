@@ -1,5 +1,5 @@
 """
-ASGI config for seaflow_backend project.
+ASGI config for seahub project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'seaflow_backend.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'seahub.settings')
 
 application = get_asgi_application()

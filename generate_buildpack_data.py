@@ -5,7 +5,7 @@ import random
 from datetime import datetime, timedelta
 
 sys.path.append(os.getcwd())
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "seaflow_backend.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "seahub.settings")
 django.setup()
 
 from seaflow.models import Dag, Task, Step, Node

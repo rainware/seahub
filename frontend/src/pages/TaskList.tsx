@@ -7,16 +7,20 @@ import { Activity, Clock, Calendar, ArrowRight } from 'lucide-react';
 
 const TaskList: React.FC = () => {
     const [tasks, setTasks] = useState<Task[]>([]);
+    const [page, setPage] = useState(1);
+    const [pageSize] = useState(5);
+    const [totalCount, setTotalCount] = useState(0);
 
     useEffect(() => {
-        getTasks()
+        getTasks({ page, page_size: pageSize })
             .then(response => {
-                setTasks(response.data);
+                setTasks(response.data.results);
+                setTotalCount(response.data.count);
             })
             .catch(error => {
                 console.error("Error fetching Tasks:", error);
             });
-    }, []);
+    }, [page]);
 
     const getStatusColor = (state: string) => {
         switch (state) {
@@ -86,6 +90,34 @@ const TaskList: React.FC = () => {
                         </div>
                     </div>
                 ))}
+            </div>
+
+            {/* Pagination Controls */}
+            <div className="flex justify-between items-center mt-6">
+                <div className="text-sm text-slate-500">
+                    Showing {tasks.length} of {totalCount} results
+                </div>
+                <div className="flex gap-2">
+                    <Button
+                        variant="outline"
+                        onClick={() => setPage(p => Math.max(1, p - 1))}
+                        disabled={page === 1}
+                        className="border-slate-200 text-slate-600 hover:bg-slate-50"
+                    >
+                        Previous
+                    </Button>
+                    <span className="flex items-center px-4 text-sm text-slate-600 font-medium">
+                        Page {page} of {Math.max(1, Math.ceil(totalCount / pageSize))}
+                    </span>
+                    <Button
+                        variant="outline"
+                        onClick={() => setPage(p => p + 1)}
+                        disabled={page >= Math.ceil(totalCount / pageSize)}
+                        className="border-slate-200 text-slate-600 hover:bg-slate-50"
+                    >
+                        Next
+                    </Button>
+                </div>
             </div>
         </div>
     );

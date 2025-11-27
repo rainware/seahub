@@ -8,7 +8,7 @@ from .pagination import StandardResultsSetPagination
 import json
 
 class ActionViewSet(viewsets.ModelViewSet):
-    queryset = Action.objects.all()
+    queryset = Action.objects.all().order_by('-id')
     serializer_class = ActionSerializer
     pagination_class = StandardResultsSetPagination
 
@@ -21,14 +21,14 @@ class ActionViewSet(viewsets.ModelViewSet):
         return super().create(request, *args, **kwargs)
 
 class DAGViewSet(viewsets.ModelViewSet):
-    queryset = Dag.objects.all()
+    queryset = Dag.objects.all().order_by('-id')
     serializer_class = DAGSerializer
     pagination_class = StandardResultsSetPagination
 
     def get_queryset(self):
         # Only show root DAGs (no parent) in list view
         if self.action == 'list':
-            return Dag.objects.filter(parent=None)
+            return Dag.objects.filter(parent=None).order_by('-id')
         return super().get_queryset()
 
     def create(self, request, *args, **kwargs):
@@ -59,7 +59,7 @@ class DAGViewSet(viewsets.ModelViewSet):
         return Response({'status': 'triggered', 'dag_id': dag.id, 'task_id': task.id})
 
 class TaskViewSet(viewsets.ModelViewSet):
-    queryset = Task.objects.all()
+    queryset = Task.objects.all().order_by('-id')
     serializer_class = TaskSerializer
     pagination_class = StandardResultsSetPagination
 
